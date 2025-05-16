@@ -28,21 +28,25 @@ tabelle_details <- ergebnisse %>%
   mutate(gesamt = spieltag_1 + spieltag_2 + spieltag_3 + spieltag_4) %>% 
   arrange(desc(gesamt))
 
-tabelle_details_cum <- tabelle_details %>% 
+tabelle_details_cum <- tabelle_details %>%
+  select(Team, where(~ is.numeric(.x) && sum(.x) != 0)) %>% 
+  rowwise() %>%
   mutate(
-    spieltag_2 = spieltag_1 + spieltag_2,
-    spieltag_3 = spieltag_2 + spieltag_3,
-    spieltag_4 = spieltag_3 + spieltag_4
-  ) %>% 
+    cum_punkte = list(cumsum(c_across(starts_with("spieltag_"))))
+  ) %>%
+  ungroup() %>%
+  select(Team, cum_punkte) %>%
+  unnest_wider(cum_punkte, names_sep = "_") %>%
+  rename_with(~ paste0("spieltag_", seq_along(.)), starts_with("cum_punkte_")) %>%
   pivot_longer(
-    cols = starts_with("spieltag"),
+    cols = starts_with("spieltag_"),
     names_to = "Spieltag",
     values_to = "Punkte"
   ) %>%
   mutate(
-    Spieltag = factor(Spieltag, levels = c("spieltag_1", "spieltag_2", "spieltag_3", "spieltag_4"))
+    Spieltag = factor(Spieltag, levels = paste0("spieltag_", 1:4))
   ) %>%
-  unique()
+  arrange(Team, Spieltag)
 
 ui <- fluidPage(
   theme = bs_theme(
