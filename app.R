@@ -57,21 +57,6 @@ ui <- fluidPage(
     secondary = "#12936E"),
   
   fluidRow(
-    column(
-      width = 10,
-      titlePanel("WG CLASH 2025 Dashboard")
-    ),
-    column(
-      width = 2,
-      img(src = "Logo_horizontal.png",
-          alt = "WG Clash Logo",
-          width = "100%",
-          height = "auto")
-    )
-  ),
-
-  
-  fluidRow(
     h3("Tabelle"),
     DTOutput("tabelle_details")
   ),
