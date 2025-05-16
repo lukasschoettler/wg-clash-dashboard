@@ -4,10 +4,8 @@ library(readxl)
 library(bslib)
 library(ggplot2)
 
-# Load data
 ergebnisse_raw <- read_excel("wg_clash_ergebnisse.xlsx")
 
-# Data wrangling
 ergebnisse <- ergebnisse_raw %>% 
   pivot_longer(where(is.numeric),
                names_to = "Team",
@@ -46,29 +44,27 @@ tabelle_details_cum <- tabelle_details %>%
   ) %>%
   unique()
 
-# UI
 ui <- fluidPage(
   theme = bs_theme(
-    preset = "darkly",  # Dark mode theme
+    preset = "minty",
     base_font = font_google("Atkinson Hyperlegible Next"),
-    primary = "#12936E",  # Accent color
-    secondary = "#12936E" # You can change this if you'd like a different secondary color
-  ),
+    primary = "#12936E",
+    secondary = "#12936E"),
   
-  # Add overall margin and padding
-  tags$head(
-    tags$style(HTML("
-      body {
-        margin: 40px;
-        padding: 20px;
-      }
-      h3 {
-        color: #12936E;  /* Accent color for headers */
-      }
-    "))
+  fluidRow(
+    column(
+      width = 10,
+      titlePanel("WG CLASH 2025 Dashboard")
+    ),
+    column(
+      width = 2,
+      img(src = "Logo_horizontal.png",
+          alt = "WG Clash Logo",
+          width = "100%",
+          height = "auto")
+    )
   ),
-  
-  titlePanel("WG CLASH 2025 Dashboard"),
+
   
   fluidRow(
     h3("Tabelle"),
@@ -81,10 +77,6 @@ ui <- fluidPage(
   )
 )
 
-
-
-
-# Server
 server <- function(input, output, session) {
   
   output$tabelle_details <- renderTable(tabelle_details, digits = 0)
@@ -93,7 +85,6 @@ server <- function(input, output, session) {
     ggplot(tabelle_details_cum, aes(x = Spieltag, y = Punkte, color = Team, group = Team)) +
       geom_line(linewidth = 1.2) +
       geom_point(size = 2) +
-      theme_dark() +  # Dark background for the plot
       labs(
         title = "Punkteverlauf pro Team über die Spieltage",
         x = "Spieltag",
@@ -102,12 +93,10 @@ server <- function(input, output, session) {
       theme(
         axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = "bottom",
-        legend.title = element_blank(),  # Optional: remove legend title
-        legend.text = element_text(color = "white")  # Make legend text white
+        legend.title = element_blank(),
       )
   })
   
 }
 
-# Run the application 
 shinyApp(ui = ui, server = server)
