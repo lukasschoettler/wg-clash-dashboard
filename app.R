@@ -3,6 +3,7 @@ library(tidyverse)
 library(readxl)
 library(bslib)
 library(ggplot2)
+library(DT)
 
 ergebnisse_raw <- read_excel("wg_clash_ergebnisse.xlsx")
 
@@ -72,7 +73,7 @@ ui <- fluidPage(
   
   fluidRow(
     h3("Tabelle"),
-    tableOutput("tabelle_details")
+    DTOutput("tabelle_details")
   ),
   
   fluidRow(
@@ -83,7 +84,29 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  output$tabelle_details <- renderTable(tabelle_details, digits = 0)
+  output$tabelle_details <- renderDataTable({
+    dt <- datatable(
+      tabelle_details,
+      options = list(paging = FALSE, searching = FALSE)
+    )
+    
+    numeric_cols <- names(tabelle_details)[2:5]
+    
+    for (col in numeric_cols) {
+      max_val <- max(tabelle_details[[col]], na.rm = TRUE)
+      if (max_val > 0) {
+        dt <- dt %>%
+          formatStyle(
+            columns = col,
+            backgroundColor = styleEqual(max_val, "lightyellow")
+          )
+      }
+    }
+    
+    dt
+  })
+  
+  
   
   output$punkte_plot <- renderPlot({
     ggplot(tabelle_details_cum, aes(x = Spieltag, y = Punkte, color = Team, group = Team)) +
